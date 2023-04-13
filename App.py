@@ -9,7 +9,7 @@ cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 fps_start_time, fps, prev_fps = 0, 0, 0
 first_frame, out = None, None
-face_dict, face_id_counter = {}, 1
+face_dict, face_id_counter, face_num = {}, 1, 0
 if not os.path.exists("detected_faces"): os.makedirs("detected_faces")
 if not os.path.exists("detected_movement"): os.makedirs("detected_movement")
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
@@ -21,6 +21,7 @@ while True:
     fps_start_time = fps_end_time
     if time.time() - timer > 0.5: prev_fps, timer = fps, time.time()
     cv2.putText(frame, "FPS: {:.1f}".format(prev_fps), (10, 30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255, 0, 255), 2)
+    cv2.putText(frame, "Unique Faces: {}".format(face_num), (10, 450), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255, 0, 255), 2)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (21, 21), 0)
     if first_frame is None:
@@ -43,11 +44,13 @@ while True:
                 unique_face = False
                 break
         if unique_face:
+            face_num += 1
             label = "Face {}".format(face_id_counter)
             face_dict[label] = [(x, y), (x+w, y+h)]
             face_id_counter += 1
             img_path = os.path.join("detected_faces", label + "_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".jpg")
-            cv2.imwrite(img_path, frame[y-50:y+h+50, x-50:x+w+50])
+            try: cv2.imwrite(img_path, frame[y-50:y+h+50, x-50:x+w+50])
+            except: cv2.imwrite(img_path, frame[y:y+h, x:x+w])
         else:
             for key, value in face_dict.items():
                 if abs(x - value[0][0]) < 50 and abs(y - value[0][1]) < 50:
