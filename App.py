@@ -1,12 +1,9 @@
-import cv2
-import os
+import cv2, os, time
 from datetime import datetime
-import time
 timer = time.time()
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 cap = cv2.VideoCapture(0)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640); cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 fps_start_time, fps, prev_fps = 0, 0, 0
 first_frame, out = None, None
 face_dict, face_id_counter, face_num = {}, 1, 0
@@ -22,8 +19,7 @@ while True:
     if time.time() - timer > 0.5: prev_fps, timer = fps, time.time()
     cv2.putText(frame, "FPS: {:.1f}".format(prev_fps), (10, 30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255, 0, 255), 2)
     cv2.putText(frame, "Unique Faces: {}".format(face_num), (10, 450), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255, 0, 255), 2)
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    gray = cv2.GaussianBlur(gray, (21, 21), 0)
+    gray = cv2.GaussianBlur(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), (21, 21), 0)
     if first_frame is None:
         first_frame = gray
         continue
@@ -49,7 +45,7 @@ while True:
             face_dict[label] = [(x, y), (x+w, y+h)]
             face_id_counter += 1
             img_path = os.path.join("detected_faces", label + "_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".jpg")
-            try: cv2.imwrite(img_path, frame[y-50:y+h+50, x-50:x+w+50])
+            try: cv2.imwrite(img_path, frame[y-50:y+h+50, x-50:x+w+50]) 
             except: cv2.imwrite(img_path, frame[y:y+h, x:x+w])
         else:
             for key, value in face_dict.items():
